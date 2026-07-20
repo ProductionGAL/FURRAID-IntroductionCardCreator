@@ -521,6 +521,18 @@ label:has(input:focus-visible) {
   line-height: 1.4;
 }
 
+.inline-field--introduction-default {
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  white-space: pre-wrap;
+  background: var(--card-surface);
+}
+
+.inline-field--introduction:focus + .inline-field--introduction-default {
+  opacity: 0;
+}
+
 .inline-schedules {
   position: absolute;
   z-index: 3;

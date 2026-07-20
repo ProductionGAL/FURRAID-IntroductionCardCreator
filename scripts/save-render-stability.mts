@@ -54,6 +54,11 @@ try {
   await page.getByLabel("닉네임").fill("저장 테스트")
   await page.locator(".inline-schedule input").first().check()
 
+  const defaultIntroduction = await page.locator(".inline-field--introduction-default").innerText()
+  if (defaultIntroduction !== "이번 행사에 참여할 예정이에요! 잘 부탁드려요!") {
+    throw new SaveRenderFailure(`unexpected default introduction: ${defaultIntroduction}`)
+  }
+
   const downloadPromise = page.waitForEvent("download", { timeout: 15_000 })
   await page.locator(".mobile-save .save-action").first().click()
   const outcome = await Promise.race([
@@ -74,17 +79,32 @@ try {
   if (outcome.name !== "furraid-introduction-card.png") {
     throw new SaveRenderFailure(`unexpected file name: ${outcome.name}`)
   }
-  const centerPixel = await page.locator(".export-canvas").evaluate((canvas) => {
+  const canvasEvidence = await page.locator(".export-canvas").evaluate((canvas) => {
     if (!(canvas instanceof HTMLCanvasElement)) throw new TypeError("Export canvas is unavailable")
     const context = canvas.getContext("2d", { willReadFrequently: true })
     if (!context) throw new TypeError("2D canvas context is unavailable")
-    return [...context.getImageData(600, 600, 1, 1).data]
+    const centerPixel = [...context.getImageData(600, 600, 1, 1).data]
+    const introductionPixels = context.getImageData(380, 1750, 720, 180).data
+    let blueTextPixels = 0
+    for (let index = 0; index < introductionPixels.length; index += 4) {
+      const red = introductionPixels[index] ?? 0
+      const green = introductionPixels[index + 1] ?? 0
+      const blue = introductionPixels[index + 2] ?? 0
+      if (blue > red + 25 && blue > green + 5) blueTextPixels += 1
+    }
+    return { centerPixel, blueTextPixels }
   })
+  const { centerPixel, blueTextPixels } = canvasEvidence
   const [red = 0, green = 0, blue = 0] = centerPixel
   if (red < 220 || green > 30 || blue < 120) {
     throw new SaveRenderFailure(`export used a stale photo: ${centerPixel.join(",")}`)
   }
-  process.stdout.write(`${JSON.stringify({ ...outcome, centerPixel })}\n`)
+  if (blueTextPixels < 500) {
+    throw new SaveRenderFailure(`default introduction was not rendered: ${blueTextPixels} pixels`)
+  }
+  process.stdout.write(
+    `${JSON.stringify({ ...outcome, defaultIntroduction, centerPixel, blueTextPixels })}\n`,
+  )
 } finally {
   await context.close()
   await browser.close()

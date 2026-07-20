@@ -3,6 +3,7 @@ import type { ChangeEvent, CSSProperties, Ref } from "react"
 import frameUrl from "../assets/Frame.png"
 import { getDisplayBox } from "../lib/crop"
 import { getInlineFieldFontSize, getInlineFieldFontWeight } from "../lib/field-text"
+import { DEFAULT_INTRODUCTION } from "../lib/introduction"
 import type { CardContent, PhotoCrop, ScheduleId } from "../model"
 import { SCHEDULES } from "../model"
 
@@ -17,6 +18,7 @@ type InlineCardEditorProps = {
 
 export const InlineCardEditor = (props: InlineCardEditorProps) => {
   const display = props.photo ? getDisplayBox(props.photo) : null
+  const hasIntroduction = props.content.introduction.trim().length > 0
   const nicknameStyle: CSSProperties & {
     "--field-font-size": string
     "--field-font-weight": string
@@ -129,7 +131,7 @@ export const InlineCardEditor = (props: InlineCardEditorProps) => {
 
       <textarea
         id="introduction"
-        className={`inline-field inline-field--introduction${props.content.introduction ? " is-filled" : ""}`}
+        className={`inline-field inline-field--introduction${hasIntroduction ? " is-filled" : ""}`}
         aria-label="자기소개"
         value={props.content.introduction}
         maxLength={72}
@@ -137,6 +139,14 @@ export const InlineCardEditor = (props: InlineCardEditorProps) => {
           props.onContentChange({ ...props.content, introduction: event.currentTarget.value })
         }
       />
+      {!hasIntroduction ? (
+        <div
+          className="inline-field inline-field--introduction inline-field--introduction-default"
+          aria-hidden
+        >
+          {DEFAULT_INTRODUCTION}
+        </div>
+      ) : null}
     </section>
   )
 }

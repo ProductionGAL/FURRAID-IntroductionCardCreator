@@ -4,6 +4,7 @@ import { chromium } from "playwright"
 declare global {
   interface Window {
     sharedCard?: File
+    sharedText?: string
   }
 }
 
@@ -36,6 +37,7 @@ try {
       configurable: true,
       value: async (data: ShareData) => {
         window.sharedCard = data.files?.[0]
+        window.sharedText = data.text
       },
     })
   })
@@ -46,6 +48,7 @@ try {
   await page.getByRole("button", { name: "이 위치로 적용" }).click()
   await page.getByRole("textbox", { name: "닉네임" }).fill("구름")
   await page.getByRole("textbox", { name: "캐릭터 이름" }).fill("Cloud")
+  await page.getByRole("textbox", { name: "자기소개" }).fill("직접 입력한 자기소개입니다.")
   await page.locator(".inline-schedule input").first().check()
   await page.evaluate(() => {
     const nativeFetch = window.fetch.bind(window)
@@ -71,6 +74,7 @@ try {
       return {
         shared: false,
         alert: document.querySelector('[role="alert"]')?.textContent ?? "",
+        sharedText: window.sharedText ?? "",
         bluePixels: 0,
         photoPixels: 0,
       }
@@ -96,7 +100,7 @@ try {
       const y = Math.floor(pixelIndex / 1200)
       if (y < 1200 && red > 120 && blue > 100 && red > green + 10) photoPixels += 1
     }
-    return { shared: true, alert: "", bluePixels, photoPixels }
+    return { shared: true, alert: "", sharedText: window.sharedText ?? "", bluePixels, photoPixels }
   })
 
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
@@ -110,6 +114,12 @@ try {
     throw new ShareRenderFailure(
       `uploaded photo pixels ${result.photoPixels} fell below ${minimumPhotoPixels}`,
     )
+  }
+  if (!result.sharedText.includes("직접 입력한 자기소개입니다.")) {
+    throw new ShareRenderFailure(`entered introduction is missing: ${result.sharedText}`)
+  }
+  if (result.sharedText.includes("이번 행사에 참여할 예정이에요! 잘 부탁드려요!")) {
+    throw new ShareRenderFailure(`default greeting replaced the introduction: ${result.sharedText}`)
   }
 } finally {
   await context.close()

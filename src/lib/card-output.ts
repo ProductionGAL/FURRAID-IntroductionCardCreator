@@ -1,4 +1,5 @@
 import type { CardContent } from "../model"
+import { getCardIntroduction } from "./introduction"
 
 const PNG_FILE_NAME = "furraid-introduction-card.png"
 const GIF_FILE_NAME = "furraid-introduction-card.gif"
@@ -26,9 +27,10 @@ export const createCardShareText = (content: CardContent): string => {
   const lines = [CARD_SHARE_TITLE]
   const nickname = content.nickname.trim()
   const characterName = content.characterName.trim()
+  const introduction = getCardIntroduction(content.introduction)
 
   if (nickname && characterName) lines.push(`${nickname} / ${characterName}`)
-  lines.push("이번 행사에 참여할 예정이에요! 잘 부탁드려요!")
+  lines.push(introduction)
   lines.push("")
   lines.push("#퍼레이드2026 #FURRAID2026")
   return lines.join("\n")

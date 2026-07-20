@@ -3,7 +3,7 @@ import type { CardContent } from "../model"
 import { createCardShareText, type FileShareTarget, shareCardImage } from "./card-output"
 
 describe("card share text", () => {
-  test("uses the fixed event greeting when an introduction is entered", () => {
+  test("uses the entered introduction in place of the default greeting", () => {
     const content: CardContent = {
       nickname: "구름",
       characterName: "Cloud",
@@ -12,7 +12,7 @@ describe("card share text", () => {
     }
 
     expect(createCardShareText(content)).toBe(
-      "FUR:RAID 2026 자기소개 카드\n구름 / Cloud\n이번 행사에 참여할 예정이에요! 잘 부탁드려요!\n\n#퍼레이드2026 #FURRAID2026",
+      "FUR:RAID 2026 자기소개 카드\n구름 / Cloud\n함께 이야기 나누고 싶어요.\n\n#퍼레이드2026 #FURRAID2026",
     )
   })
 
@@ -62,7 +62,8 @@ describe("card share text", () => {
     expect(result).toBe("shared")
     expect(payloads[0]?.files?.[0]?.name).toBe("furraid-introduction-card.png")
     expect(payloads[0]?.text).toContain("구름 / Cloud")
-    expect(payloads[0]?.text).toContain("이번 행사에 참여할 예정이에요! 잘 부탁드려요!")
+    expect(payloads[0]?.text).toContain("카드에 들어가는 소개")
+    expect(payloads[0]?.text).not.toContain("이번 행사에 참여할 예정이에요! 잘 부탁드려요!")
   })
 
   test("hands an animated GIF file to a target that supports GIF sharing", async () => {
@@ -89,6 +90,7 @@ describe("card share text", () => {
     expect(result).toBe("shared")
     expect(payloads[0]?.files?.[0]?.name).toBe("furraid-introduction-card.gif")
     expect(payloads[0]?.files?.[0]?.type).toBe("image/gif")
+    expect(payloads[0]?.text).toContain("GIF 공유 테스트")
   })
 
   test("reports GIF sharing as unavailable when the target rejects GIF files", async () => {
