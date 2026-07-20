@@ -1,4 +1,6 @@
 import { toCanvas } from "html-to-image"
+import type { PhotoCrop } from "../model"
+import { getSourceCrop } from "./crop"
 
 export const CARD_WIDTH = 1380
 export const CARD_HEIGHT = 2167
@@ -76,6 +78,7 @@ const createNativeEditorClone = (
   clonedNode.setAttribute("aria-hidden", "true")
   clonedNode.inert = true
   clonedNode.querySelector(".inline-card__frame")?.remove()
+  clonedNode.querySelector(".inline-card__photo")?.remove()
   for (const element of clonedNode.querySelectorAll("[id]")) element.removeAttribute("id")
   synchronizeFormValues(source, clonedNode)
   host.append(clonedNode)
@@ -86,6 +89,7 @@ const createNativeEditorClone = (
 type RenderInput = {
   readonly canvas: HTMLCanvasElement
   readonly frameUrl: string
+  readonly photo: PhotoCrop
   readonly source: HTMLElement
 }
 
@@ -99,7 +103,7 @@ export const renderCard = async (input: RenderInput): Promise<void> => {
   const { host, editor } = createNativeEditorClone(input.source)
 
   try {
-    const [editorCanvas, frame] = await Promise.all([
+    const [editorCanvas, frame, photo] = await Promise.all([
       toCanvas(editor, {
         width: EDITABLE_WIDTH,
         height: CARD_HEIGHT,
@@ -110,9 +114,22 @@ export const renderCard = async (input: RenderInput): Promise<void> => {
         skipAutoScale: true,
       }),
       loadImage(input.frameUrl),
+      loadImage(input.photo.url),
     ])
+    const crop = getSourceCrop(input.photo)
     context.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT)
     context.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT)
+    context.drawImage(
+      photo,
+      crop.sourceX,
+      crop.sourceY,
+      crop.sourceSize,
+      crop.sourceSize,
+      0,
+      0,
+      EDITABLE_WIDTH,
+      EDITABLE_WIDTH,
+    )
     context.drawImage(editorCanvas, 0, 0, EDITABLE_WIDTH, CARD_HEIGHT)
   } finally {
     host.remove()

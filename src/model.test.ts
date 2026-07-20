@@ -24,7 +24,7 @@ describe("card output validation", () => {
     expect(getCardValidationIssue(content, true)).toBe("nickname")
   })
 
-  test("requires a non-blank character name", () => {
+  test("accepts a blank optional character name", () => {
     const content: CardContent = {
       nickname: "구름",
       characterName: " \n ",
@@ -32,7 +32,7 @@ describe("card output validation", () => {
       schedules: ["oct09"],
     }
 
-    expect(getCardValidationIssue(content, true)).toBe("characterName")
+    expect(getCardValidationIssue(content, true)).toBeNull()
   })
 
   test("requires at least one schedule", () => {

@@ -14,14 +14,12 @@ import { EMPTY_CONTENT, getCardValidationIssue } from "./model"
 const VALIDATION_MESSAGES = {
   photo: "사진을 업로드해 주세요.",
   nickname: "닉네임을 입력해 주세요.",
-  characterName: "캐릭터 이름을 입력해 주세요.",
   schedule: "참가 일정을 최소 하루 이상 선택해 주세요.",
 } as const satisfies Record<CardValidationIssue, string>
 
 const VALIDATION_TARGETS = {
   photo: '.inline-card__photo input[type="file"]',
   nickname: "#nickname",
-  characterName: "#character-name",
   schedule: ".inline-schedule input",
 } as const satisfies Record<CardValidationIssue, string>
 
@@ -154,12 +152,13 @@ export const App = () => {
 
   const exportCard = async (): Promise<void> => {
     if (isExporting || !validateContent()) return
+    if (!photo) return
     const canvas = canvasRef.current
     const source = editorRef.current
     if (!canvas || !source) return
     setIsExporting(true)
     try {
-      await renderCard({ canvas, frameUrl, source })
+      await renderCard({ canvas, frameUrl, photo, source })
       downloadCardImage(await canvasToPngBlob(canvas))
     } catch {
       setUploadError("이미지를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.")
@@ -170,12 +169,13 @@ export const App = () => {
 
   const shareCurrentCard = async (): Promise<void> => {
     if (isExporting || !validateContent()) return
+    if (!photo) return
     const canvas = canvasRef.current
     const source = editorRef.current
     if (!canvas || !source) return
     setIsExporting(true)
     try {
-      await renderCard({ canvas, frameUrl, source })
+      await renderCard({ canvas, frameUrl, photo, source })
       const result = await shareCardImage({ blob: await canvasToPngBlob(canvas), content })
       if (result === "unavailable") {
         setUploadError(

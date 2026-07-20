@@ -16,6 +16,9 @@ export type DisplayBox = {
 const clamp = (value: number, minimum: number, maximum: number): number =>
   Math.min(maximum, Math.max(minimum, value))
 
+const minimumZoom = 1
+const maximumZoom = 3
+
 export const clampPan = (photo: PhotoCrop, pan: Point, zoom = photo.zoom): Point => {
   const baseScale = Math.max(1 / photo.width, 1 / photo.height)
   const displayWidth = photo.width * baseScale * zoom
@@ -40,6 +43,28 @@ export const getDisplayBox = (photo: PhotoCrop): DisplayBox => {
     left: (1 - width) / 2 + photo.pan.x,
     top: (1 - height) / 2 + photo.pan.y,
   }
+}
+
+export const zoomPhotoAt = (photo: PhotoCrop, zoom: number, focalPoint: Point): PhotoCrop => {
+  const nextZoom = clamp(zoom, minimumZoom, maximumZoom)
+  const currentDisplay = getDisplayBox(photo)
+  const zoomRatio = nextZoom / photo.zoom
+  const nextWidth = currentDisplay.width * zoomRatio
+  const nextHeight = currentDisplay.height * zoomRatio
+  const imageX = (focalPoint.x - currentDisplay.left) / currentDisplay.width
+  const imageY = (focalPoint.y - currentDisplay.top) / currentDisplay.height
+  const nextLeft = focalPoint.x - imageX * nextWidth
+  const nextTop = focalPoint.y - imageY * nextHeight
+  const pan = clampPan(
+    photo,
+    {
+      x: nextLeft - (1 - nextWidth) / 2,
+      y: nextTop - (1 - nextHeight) / 2,
+    },
+    nextZoom,
+  )
+
+  return { ...photo, zoom: nextZoom, pan }
 }
 
 export const getSourceCrop = (photo: PhotoCrop): CropBox => {

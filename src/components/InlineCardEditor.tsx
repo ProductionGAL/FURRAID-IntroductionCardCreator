@@ -98,11 +98,10 @@ export const InlineCardEditor = (props: InlineCardEditorProps) => {
       <input
         id="character-name"
         className={`inline-field inline-field--character${props.content.characterName ? " is-filled" : ""}`}
-        aria-label="캐릭터 이름"
+        aria-label="캐릭터 이름 (선택)"
         style={characterNameStyle}
         value={props.content.characterName}
         maxLength={20}
-        required
         onChange={(event) =>
           props.onContentChange({ ...props.content, characterName: event.currentTarget.value })
         }

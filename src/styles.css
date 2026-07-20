@@ -816,25 +816,16 @@ label:has(input:focus-visible) {
     );
 }
 
-.zoom-control {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-}
-
-.zoom-control input {
-  width: 100%;
-  min-height: 44px;
-  accent-color: var(--card-blue);
-}
-
 .helper-text {
-  margin: 0 0 var(--space-3);
+  margin: var(--space-3) 0;
   color: var(--ink);
   font-size: 12px;
+  line-height: 1.45;
   text-align: center;
+}
+
+.helper-text__mobile {
+  display: none;
 }
 
 .button {
@@ -883,6 +874,14 @@ label:has(input:focus-visible) {
 }
 
 @media (max-width: 859px) {
+  .helper-text__desktop {
+    display: none;
+  }
+
+  .helper-text__mobile {
+    display: inline;
+  }
+
   .landing-page {
     min-height: 100dvh;
     display: block;
