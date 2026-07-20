@@ -26,6 +26,19 @@ export type CardContent = {
   readonly schedules: readonly ScheduleId[]
 }
 
+export type CardValidationIssue = "photo" | "nickname" | "characterName" | "schedule"
+
+export const getCardValidationIssue = (
+  content: CardContent,
+  hasPhoto: boolean,
+): CardValidationIssue | null => {
+  if (!hasPhoto) return "photo"
+  if (!content.nickname.trim()) return "nickname"
+  if (!content.characterName.trim()) return "characterName"
+  if (content.schedules.length === 0) return "schedule"
+  return null
+}
+
 export const EMPTY_CONTENT: CardContent = {
   nickname: "",
   characterName: "",

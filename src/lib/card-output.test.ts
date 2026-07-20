@@ -3,17 +3,28 @@ import type { CardContent } from "../model"
 import { createCardShareText, type FileShareTarget, shareCardImage } from "./card-output"
 
 describe("card share text", () => {
-  test("includes the compact identity only when both names are present", () => {
+  test("uses the entered introduction in place of the default greeting", () => {
     const content: CardContent = {
       nickname: "구름",
       characterName: "Cloud",
-      introduction: "이 소개는 카드 이미지 안에서만 보여요.",
+      introduction: "  함께 이야기 나누고 싶어요.  ",
       schedules: ["oct09", "oct11"],
     }
 
     expect(createCardShareText(content)).toBe(
-      "FUR:RAID 2026 자기소개 카드\n구름 / Cloud\n이번 행사에 참여할 예정이에요! 잘 부탁드려요!\n\n#퍼레이드2026 #FURRAID2026",
+      "FUR:RAID 2026 자기소개 카드\n구름 / Cloud\n함께 이야기 나누고 싶어요.\n\n#퍼레이드2026 #FURRAID2026",
     )
+  })
+
+  test("uses the default greeting when the introduction is blank", () => {
+    const content: CardContent = {
+      nickname: "",
+      characterName: "",
+      introduction: "  \n  ",
+      schedules: [],
+    }
+
+    expect(createCardShareText(content)).toContain("이번 행사에 참여할 예정이에요! 잘 부탁드려요!")
   })
 
   test("omits the identity line when either name is missing", () => {
@@ -51,5 +62,6 @@ describe("card share text", () => {
     expect(result).toBe("shared")
     expect(payloads[0]?.files?.[0]?.name).toBe("furraid-introduction-card.png")
     expect(payloads[0]?.text).toContain("구름 / Cloud")
+    expect(payloads[0]?.text).toContain("카드에 들어가는 소개")
   })
 })

@@ -2,6 +2,7 @@ import type { CardContent } from "../model"
 
 const CARD_FILE_NAME = "furraid-introduction-card.png"
 const CARD_SHARE_TITLE = "FUR:RAID 2026 자기소개 카드"
+const DEFAULT_SHARE_GREETING = "이번 행사에 참여할 예정이에요! 잘 부탁드려요!"
 
 export type FileShareTarget = {
   readonly canShare: (data?: ShareData) => boolean
@@ -25,9 +26,10 @@ export const createCardShareText = (content: CardContent): string => {
   const lines = [CARD_SHARE_TITLE]
   const nickname = content.nickname.trim()
   const characterName = content.characterName.trim()
+  const introduction = content.introduction.trim()
 
   if (nickname && characterName) lines.push(`${nickname} / ${characterName}`)
-  lines.push("이번 행사에 참여할 예정이에요! 잘 부탁드려요!")
+  lines.push(introduction || DEFAULT_SHARE_GREETING)
   lines.push("")
   lines.push("#퍼레이드2026 #FURRAID2026")
   return lines.join("\n")

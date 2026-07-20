@@ -8,8 +8,22 @@ import { InlineCardEditor } from "./components/InlineCardEditor"
 import { canvasToPngBlob, downloadCardImage, shareCardImage } from "./lib/card-output"
 import { renderCard } from "./lib/draw-card"
 import { createPhotoCrop } from "./lib/image-file"
-import type { CardContent, PhotoCrop } from "./model"
-import { EMPTY_CONTENT } from "./model"
+import type { CardContent, CardValidationIssue, PhotoCrop } from "./model"
+import { EMPTY_CONTENT, getCardValidationIssue } from "./model"
+
+const VALIDATION_MESSAGES = {
+  photo: "사진을 업로드해 주세요.",
+  nickname: "닉네임을 입력해 주세요.",
+  characterName: "캐릭터 이름을 입력해 주세요.",
+  schedule: "참가 일정을 최소 하루 이상 선택해 주세요.",
+} as const satisfies Record<CardValidationIssue, string>
+
+const VALIDATION_TARGETS = {
+  photo: '.inline-card__photo input[type="file"]',
+  nickname: "#nickname",
+  characterName: "#character-name",
+  schedule: ".inline-schedule input",
+} as const satisfies Record<CardValidationIssue, string>
 
 type SaveActionProps = {
   readonly disabled: boolean
@@ -126,10 +140,23 @@ export const App = () => {
       })
   }
 
+  const validateContent = (): boolean => {
+    const issue = getCardValidationIssue(content, photo !== null)
+    if (!issue) {
+      setUploadError("")
+      return true
+    }
+
+    setUploadError(VALIDATION_MESSAGES[issue])
+    document.querySelector<HTMLInputElement>(VALIDATION_TARGETS[issue])?.focus()
+    return false
+  }
+
   const exportCard = async (): Promise<void> => {
+    if (isExporting || !validateContent()) return
     const canvas = canvasRef.current
     const source = editorRef.current
-    if (!canvas || !source || isExporting) return
+    if (!canvas || !source) return
     setIsExporting(true)
     try {
       await renderCard({ canvas, frameUrl, source })
@@ -142,10 +169,10 @@ export const App = () => {
   }
 
   const shareCurrentCard = async (): Promise<void> => {
+    if (isExporting || !validateContent()) return
     const canvas = canvasRef.current
     const source = editorRef.current
-    if (!canvas || !source || isExporting) return
-    setUploadError("")
+    if (!canvas || !source) return
     setIsExporting(true)
     try {
       await renderCard({ canvas, frameUrl, source })

@@ -73,7 +73,12 @@ export const InlineCardEditor = (props: InlineCardEditorProps) => {
         ) : (
           <label className="inline-card__photo-upload">
             <span className="sr-only">사진 선택하기. JPG, PNG, WebP, 최대 200MB</span>
-            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={selectFile} />
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              required
+              onChange={selectFile}
+            />
           </label>
         )}
       </div>
@@ -85,6 +90,7 @@ export const InlineCardEditor = (props: InlineCardEditorProps) => {
         style={nicknameStyle}
         value={props.content.nickname}
         maxLength={20}
+        required
         onChange={(event) =>
           props.onContentChange({ ...props.content, nickname: event.currentTarget.value })
         }
@@ -96,12 +102,14 @@ export const InlineCardEditor = (props: InlineCardEditorProps) => {
         style={characterNameStyle}
         value={props.content.characterName}
         maxLength={20}
+        required
         onChange={(event) =>
           props.onContentChange({ ...props.content, characterName: event.currentTarget.value })
         }
       />
 
-      <fieldset className="inline-schedules" aria-label="참가 일정">
+      <fieldset className="inline-schedules">
+        <legend className="sr-only">참가 일정 (필수, 하나 이상 선택)</legend>
         {SCHEDULES.map((schedule) => {
           const checked = props.content.schedules.includes(schedule.id)
           return (

@@ -3,7 +3,6 @@ import { toCanvas } from "html-to-image"
 export const CARD_WIDTH = 1380
 export const CARD_HEIGHT = 2167
 const EDITABLE_WIDTH = 1200
-const RAIL_WIDTH = CARD_WIDTH - EDITABLE_WIDTH
 
 class ImageLoadError extends Error {
   readonly source: string
@@ -19,7 +18,12 @@ const loadImage = (source: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const image = new Image()
     image.decoding = "async"
-    image.onload = () => resolve(image)
+    image.onload = () => {
+      void image.decode().then(
+        () => resolve(image),
+        () => reject(new ImageLoadError(source)),
+      )
+    }
     image.onerror = () => reject(new ImageLoadError(source))
     image.src = source
   })
@@ -68,8 +72,10 @@ const createNativeEditorClone = (
   })
   clonedNode.style.width = `${EDITABLE_WIDTH}px`
   clonedNode.style.height = `${CARD_HEIGHT}px`
+  clonedNode.style.background = "transparent"
   clonedNode.setAttribute("aria-hidden", "true")
   clonedNode.inert = true
+  clonedNode.querySelector(".inline-card__frame")?.remove()
   for (const element of clonedNode.querySelectorAll("[id]")) element.removeAttribute("id")
   synchronizeFormValues(source, clonedNode)
   host.append(clonedNode)
@@ -106,18 +112,8 @@ export const renderCard = async (input: RenderInput): Promise<void> => {
       loadImage(input.frameUrl),
     ])
     context.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT)
+    context.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT)
     context.drawImage(editorCanvas, 0, 0, EDITABLE_WIDTH, CARD_HEIGHT)
-    context.drawImage(
-      frame,
-      EDITABLE_WIDTH,
-      0,
-      RAIL_WIDTH,
-      CARD_HEIGHT,
-      EDITABLE_WIDTH,
-      0,
-      RAIL_WIDTH,
-      CARD_HEIGHT,
-    )
   } finally {
     host.remove()
   }
