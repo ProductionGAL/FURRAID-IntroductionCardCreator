@@ -12,6 +12,7 @@ lighthouse-report*/
 
 # Local tooling and generated QA evidence
 .omo/
+.debug-journal.md
 .codegraph
 .react-doctor-report.json
 .vite/
