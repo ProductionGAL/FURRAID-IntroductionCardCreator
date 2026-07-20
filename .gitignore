@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build and test output
+dist/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+lighthouse-report*/
+*.tsbuildinfo
+
+# Local tooling and generated QA evidence
+.omo/
+.codegraph
+.react-doctor-report.json
+.vite/
+*.log
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
