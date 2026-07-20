@@ -18,7 +18,10 @@ export const CropDialog = (props: CropDialogProps) => {
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
-    if (props.open && !dialog.open) dialog.showModal()
+    if (props.open && !dialog.open) {
+      dialog.showModal()
+      dialog.focus({ preventScroll: true })
+    }
     if (!props.open && dialog.open) dialog.close()
   }, [props.open])
 
@@ -26,6 +29,7 @@ export const CropDialog = (props: CropDialogProps) => {
     <dialog
       ref={dialogRef}
       className="crop-dialog"
+      tabIndex={-1}
       aria-labelledby="crop-dialog-title"
       onCancel={(event) => {
         event.preventDefault()

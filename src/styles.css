@@ -725,6 +725,10 @@ label:has(input:focus-visible) {
   background: var(--modal-backdrop);
 }
 
+.crop-dialog:focus {
+  outline: none;
+}
+
 .crop-dialog__header {
   display: flex;
   align-items: flex-start;
