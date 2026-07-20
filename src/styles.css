@@ -497,7 +497,7 @@ label:has(input:focus-visible) {
 
 .inline-field--nickname,
 .inline-field--character {
-  padding-top: 2cqw;
+  padding-top: 1.6cqw;
   font-size: var(--field-font-size);
   font-weight: var(--field-font-weight, 600);
   line-height: 1;
