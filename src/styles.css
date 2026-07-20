@@ -330,6 +330,11 @@ label:has(input:focus-visible) {
   height: 30px;
 }
 
+.save-action__icon svg {
+  width: 30px;
+  height: 30px;
+}
+
 .save-action:disabled {
   opacity: 0.55;
   cursor: wait;
@@ -506,7 +511,7 @@ label:has(input:focus-visible) {
   font-size: 4.235cqw;
   font-weight: 650;
   resize: none;
-  line-height: 1.55;
+  line-height: 1.4;
 }
 
 .inline-schedules {
@@ -1014,6 +1019,10 @@ label:has(input:focus-visible) {
 
   .mobile-save .save-action {
     min-height: 58px;
+  }
+
+  .mobile-save .share-action {
+    margin-top: var(--space-6);
   }
 
   .mobile-save .save-action > span:first-child {

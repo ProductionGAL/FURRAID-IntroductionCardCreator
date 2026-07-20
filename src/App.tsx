@@ -1,26 +1,15 @@
-import { WarningCircle } from "@phosphor-icons/react"
+import { WarningCircle, XLogoIcon } from "@phosphor-icons/react"
 import { useEffect, useRef, useState } from "react"
 import frameUrl from "./assets/Frame.png"
 import logoUrl from "./assets/furraid2026_left_logo.png"
 import downloadIconUrl from "./assets/Icon_Download2.svg"
 import { CropDialog } from "./components/CropDialog"
 import { InlineCardEditor } from "./components/InlineCardEditor"
+import { canvasToPngBlob, downloadCardImage, shareCardImage } from "./lib/card-output"
 import { renderCard } from "./lib/draw-card"
 import { createPhotoCrop } from "./lib/image-file"
 import type { CardContent, PhotoCrop } from "./model"
 import { EMPTY_CONTENT } from "./model"
-
-const downloadCanvas = (canvas: HTMLCanvasElement): void => {
-  canvas.toBlob((blob) => {
-    if (!blob) return
-    const url = URL.createObjectURL(blob)
-    const anchor = document.createElement("a")
-    anchor.href = url
-    anchor.download = "furraid-introduction-card.png"
-    anchor.click()
-    URL.revokeObjectURL(url)
-  }, "image/png")
-}
 
 type SaveActionProps = {
   readonly disabled: boolean
@@ -37,6 +26,20 @@ const SaveAction = ({ disabled, onClick }: SaveActionProps) => (
     </small>
     <span className="save-action__icon" aria-hidden>
       <img src={downloadIconUrl} alt="" width="30" height="30" />
+    </span>
+  </button>
+)
+
+const ShareAction = ({ disabled, onClick }: SaveActionProps) => (
+  <button className="save-action share-action" type="button" onClick={onClick} disabled={disabled}>
+    <span>X로 공유</span>
+    <small>
+      Share to X
+      <br />
+      Xで共有
+    </small>
+    <span className="save-action__icon" aria-hidden>
+      <XLogoIcon weight="regular" />
     </span>
   </button>
 )
@@ -130,9 +133,32 @@ export const App = () => {
     setIsExporting(true)
     try {
       await renderCard({ canvas, frameUrl, source })
-      downloadCanvas(canvas)
+      downloadCardImage(await canvasToPngBlob(canvas))
     } catch {
       setUploadError("이미지를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.")
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const shareCurrentCard = async (): Promise<void> => {
+    const canvas = canvasRef.current
+    const source = editorRef.current
+    if (!canvas || !source || isExporting) return
+    setUploadError("")
+    setIsExporting(true)
+    try {
+      await renderCard({ canvas, frameUrl, source })
+      const result = await shareCardImage({ blob: await canvasToPngBlob(canvas), content })
+      if (result === "unavailable") {
+        setUploadError(
+          "이 브라우저에서는 이미지 공유를 지원하지 않습니다. 이미지 저장을 이용해 주세요.",
+        )
+      }
+    } catch (error: unknown) {
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        setUploadError("카드를 공유하지 못했습니다. 잠시 후 다시 시도해 주세요.")
+      }
     } finally {
       setIsExporting(false)
     }
@@ -170,8 +196,9 @@ export const App = () => {
         />
       </main>
 
-      <section className="mobile-save" aria-label="카드 저장">
+      <section className="mobile-save" aria-label="카드 저장 및 공유">
         <SaveAction disabled={isExporting} onClick={() => void exportCard()} />
+        <ShareAction disabled={isExporting} onClick={() => void shareCurrentCard()} />
       </section>
       <PrivacyCopy className="privacy-copy privacy-copy--mobile" />
 

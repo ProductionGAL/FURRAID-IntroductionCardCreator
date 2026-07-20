@@ -4,6 +4,12 @@ import { defineConfig } from "vite"
 export default defineConfig({
   base: "./",
   plugins: [react()],
+  server: {
+    host: true,
+  },
+  preview: {
+    host: true,
+  },
   build: {
     rollupOptions: {
       input: {
