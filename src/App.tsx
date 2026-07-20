@@ -5,6 +5,7 @@ import logoUrl from "./assets/furraid2026_left_logo.png"
 import downloadIconUrl from "./assets/Icon_Download2.svg"
 import { CropDialog } from "./components/CropDialog"
 import { InlineCardEditor } from "./components/InlineCardEditor"
+import { LegalFooter } from "./components/LegalFooter"
 import { downloadCardImage, shareCardImage } from "./lib/card-output"
 import { createPhotoCrop, isGifFile } from "./lib/image-file"
 import { renderCardBlob } from "./lib/render-card-blob"
@@ -265,6 +266,7 @@ export const App = () => {
           <SaveAction disabled={isExporting} onClick={() => void exportCard()} />
         </div>
         <PrivacyCopy className="privacy-copy privacy-copy--desktop" />
+        <LegalFooter className="legal-footer--desktop" noticesHref="../THIRD_PARTY_NOTICES.txt" />
       </aside>
 
       <main className="editor-stage">
@@ -283,6 +285,7 @@ export const App = () => {
         <ShareAction disabled={isExporting} onClick={() => void shareCurrentCard()} />
       </section>
       <PrivacyCopy className="privacy-copy privacy-copy--mobile" />
+      <LegalFooter className="legal-footer--mobile" noticesHref="../THIRD_PARTY_NOTICES.txt" />
 
       {uploadError ? <ErrorToast key={uploadError} message={uploadError} /> : null}
       {gifExportProgress === null ? null : <GifExportProgress progress={gifExportProgress} />}

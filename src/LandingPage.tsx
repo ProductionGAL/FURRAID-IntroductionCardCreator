@@ -3,6 +3,7 @@ import selfDesignFrameUrl from "./assets/Frame_SelfDesign.png"
 import logoUrl from "./assets/furraid2026_left_logo.png"
 import downloadIconUrl from "./assets/Icon_Download.svg"
 import inputFormIconUrl from "./assets/Icon_InputForm.svg"
+import { LegalFooter } from "./components/LegalFooter"
 
 type LandingActionProps = {
   readonly href: string
@@ -82,5 +83,6 @@ export const LandingPage = () => (
         iconHeight={80}
       />
     </nav>
+    <LegalFooter className="legal-footer--landing" noticesHref="./THIRD_PARTY_NOTICES.txt" />
   </main>
 )

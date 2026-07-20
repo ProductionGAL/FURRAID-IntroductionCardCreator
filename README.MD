@@ -83,3 +83,13 @@ scripts/          브라우저 및 렌더링 QA 스크립트
 업로드한 사진과 입력 내용은 브라우저 안에서만 처리됩니다. 서버 전송, 쿠키, 로컬 스토리지 저장을 하지 않기 때문에 새로고침하거나 탭을 닫으면 작업 내용이 사라집니다.
 
 Wanted Sans의 라이선스는 `public/fonts/WANTED-SANS-OFL.txt`에서 확인할 수 있습니다.
+
+## 저작권 및 라이선스
+
+Copyright © 2026 FUR:RAID Comm. All rights reserved.
+
+Developed by Logmong.
+
+FUR:RAID Comm.가 권리를 보유한 프로젝트 자체 제작 부분은 별도의 서면 허가 없이 복제, 수정, 2차 활용 또는 재배포할 수 없습니다. 사이트에서 만든 자기소개 카드를 개인적인 행사 참여 안내 용도로 저장하고 공유하는 것은 가능합니다.
+
+React, Wanted Sans 등 외부 요소에는 각각의 오픈소스 라이선스가 그대로 적용됩니다. 전체 범위는 [`LICENSE.md`](LICENSE.md), 외부 요소별 고지는 [`public/THIRD_PARTY_NOTICES.txt`](public/THIRD_PARTY_NOTICES.txt)에서 확인할 수 있습니다.

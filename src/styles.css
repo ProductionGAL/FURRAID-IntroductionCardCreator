@@ -94,6 +94,7 @@ label:has(input:focus-visible) {
 }
 
 .landing-page {
+  position: relative;
   min-height: 100dvh;
   display: grid;
   grid-template-columns: var(--landing-brand-column) 1fr;
@@ -381,6 +382,54 @@ label:has(input:focus-visible) {
 
 .privacy-copy--desktop p:last-child {
   font-size: 11.25px;
+}
+
+.legal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  color: var(--white-muted);
+  font-size: 10px;
+  font-weight: 550;
+  line-height: 1.4;
+}
+
+.legal-footer > span,
+.legal-footer a {
+  white-space: nowrap;
+}
+
+.legal-footer a {
+  color: var(--white);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.legal-footer a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.legal-footer a:focus-visible {
+  outline: 2px dashed var(--white);
+  outline-offset: 3px;
+}
+
+.legal-footer--landing {
+  position: absolute;
+  bottom: var(--space-6);
+  left: 11.25vw;
+  max-width: calc(var(--landing-brand-column) - 11.25vw - var(--space-6));
+}
+
+.legal-footer--desktop {
+  width: min(100%, 360px);
+  margin-top: var(--space-6);
+}
+
+.legal-footer--mobile {
+  display: none;
 }
 
 .editor-stage {
@@ -1026,6 +1075,13 @@ label:has(input:focus-visible) {
     height: 27px;
   }
 
+  .legal-footer--landing {
+    position: static;
+    max-width: none;
+    margin: var(--space-8) var(--landing-mobile-inset) var(--space-6);
+    font-size: 10.5px;
+  }
+
   .poster-app {
     height: auto;
     min-height: 100dvh;
@@ -1067,7 +1123,8 @@ label:has(input:focus-visible) {
   }
 
   .desktop-save,
-  .privacy-copy--desktop {
+  .privacy-copy--desktop,
+  .legal-footer--desktop {
     display: none;
   }
 
@@ -1117,7 +1174,7 @@ label:has(input:focus-visible) {
     max-width: none;
     display: block;
     margin-inline: 24px;
-    padding: 64px 0 72px;
+    padding: 64px 0 32px;
     background: var(--furraid-blue);
   }
 
@@ -1131,6 +1188,14 @@ label:has(input:focus-visible) {
 
   .privacy-copy--mobile p:last-child {
     font-size: clamp(9.5px, 3vw, 11.75px);
+  }
+
+  .legal-footer--mobile {
+    width: calc(100% - 48px);
+    display: flex;
+    margin-inline: 24px;
+    padding: 0 0 48px;
+    font-size: 10.5px;
   }
 
   .crop-dialog {
