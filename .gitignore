@@ -16,6 +16,7 @@ lighthouse-report*/
 .react-doctor-report.json
 .vite/
 *.log
+DESIGN.md
 
 # Local environment files
 .env
