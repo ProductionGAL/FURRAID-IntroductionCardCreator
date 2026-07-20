@@ -1,7 +1,8 @@
-import { DownloadSimple, WarningCircle } from "@phosphor-icons/react"
+import { WarningCircle } from "@phosphor-icons/react"
 import { useEffect, useRef, useState } from "react"
 import frameUrl from "./assets/Frame.png"
 import logoUrl from "./assets/furraid2026_left_logo.png"
+import downloadIconUrl from "./assets/Icon_Download2.svg"
 import { CropDialog } from "./components/CropDialog"
 import { InlineCardEditor } from "./components/InlineCardEditor"
 import { renderCard } from "./lib/draw-card"
@@ -34,8 +35,8 @@ const SaveAction = ({ disabled, onClick }: SaveActionProps) => (
       <br />
       カード保存
     </small>
-    <span className="save-action__icon">
-      <DownloadSimple aria-hidden weight="light" />
+    <span className="save-action__icon" aria-hidden>
+      <img src={downloadIconUrl} alt="" width="30" height="30" />
     </span>
   </button>
 )

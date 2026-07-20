@@ -3,4 +3,12 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      input: {
+        landing: "index.html",
+        editor: "editor/index.html",
+      },
+    },
+  },
 })

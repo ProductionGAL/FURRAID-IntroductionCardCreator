@@ -8,7 +8,7 @@ class ParityFailure extends Error {
   }
 }
 
-const baseUrl = "http://127.0.0.1:4173"
+const baseUrl = "http://127.0.0.1:4173/editor/"
 const evidenceDirectory = ".omo/evidence/preview-export-parity"
 const exportedPath = `${evidenceDirectory}/parity-exported-card.png`
 const previewPath = `${evidenceDirectory}/parity-preview-native.png`

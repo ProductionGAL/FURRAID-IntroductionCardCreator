@@ -12,7 +12,7 @@ const requireCondition = (condition: boolean, message: string): void => {
   if (!condition) throw new QaFailure(message)
 }
 
-const baseUrl = "http://127.0.0.1:4173"
+const baseUrl = "http://127.0.0.1:4173/editor/"
 const evidenceDirectory = ".omo/evidence/self-card-redesign"
 const validImage = "/tmp/furraid-redesign-valid.png"
 const smallImage = "/tmp/furraid-redesign-small.png"
