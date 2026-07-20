@@ -12,6 +12,6 @@ if (import.meta.env.DEV && import.meta.env.VITE_DISABLE_REACT_DEVTOOLS !== "1") 
 const rootElement = document.getElementById("root")
 if (!rootElement) throw new TypeError("React root element is missing")
 
-const isEditorRoute = /^\/editor(?:\/|$)/.test(window.location.pathname)
+const isEditorRoute = /(?:^|\/)editor(?:\/|$)/.test(window.location.pathname)
 
 createRoot(rootElement).render(<StrictMode>{isEditorRoute ? <App /> : <LandingPage />}</StrictMode>)
