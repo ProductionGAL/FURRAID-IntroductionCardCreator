@@ -30,10 +30,11 @@ export const createCardShareText = (content: CardContent): string => {
     (schedule) => schedule.label,
   )
 
-  if (nickname) lines.push(`닉네임: ${nickname}`)
-  if (characterName) lines.push(`캐릭터 이름: ${characterName}`)
-  if (schedules.length > 0) lines.push(`참가 일정: ${schedules.join(", ")}`)
-  lines.push("#FURRAID2026")
+  lines.push("FUR:RAID 2026 FIELDTRIP")
+  if (nickname && characterName) lines.push(`${nickname} / ${characterName}`)
+  lines.push("이번 행사에 참여할 예정이에요! 잘 부탁드려요!")
+  lines.push("")
+  lines.push("#퍼레이드2026 #FURRAID2026")
   return lines.join("\n")
 }
 
