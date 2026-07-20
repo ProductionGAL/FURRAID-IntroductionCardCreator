@@ -1,5 +1,4 @@
 import type { CardContent } from "../model"
-import { SCHEDULES } from "../model"
 
 const CARD_FILE_NAME = "furraid-introduction-card.png"
 const CARD_SHARE_TITLE = "FUR:RAID 2026 자기소개 카드"
@@ -26,9 +25,6 @@ export const createCardShareText = (content: CardContent): string => {
   const lines = [CARD_SHARE_TITLE]
   const nickname = content.nickname.trim()
   const characterName = content.characterName.trim()
-  const schedules = SCHEDULES.filter((schedule) => content.schedules.includes(schedule.id)).map(
-    (schedule) => schedule.label,
-  )
 
   lines.push("FUR:RAID 2026 FIELDTRIP")
   if (nickname && characterName) lines.push(`${nickname} / ${characterName}`)
