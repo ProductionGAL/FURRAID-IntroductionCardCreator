@@ -12,6 +12,7 @@ export type Point = {
 }
 
 export type PhotoCrop = {
+  readonly file: File
   readonly url: string
   readonly width: number
   readonly height: number

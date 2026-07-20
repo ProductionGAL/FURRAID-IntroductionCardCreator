@@ -72,10 +72,10 @@ export const InlineCardEditor = (props: InlineCardEditorProps) => {
           </>
         ) : (
           <label className="inline-card__photo-upload">
-            <span className="sr-only">사진 선택하기. JPG, PNG, WebP, 최대 200MB</span>
+            <span className="sr-only">사진 선택하기. JPG, PNG, WebP, GIF, 최대 200MB</span>
             <input
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png,image/webp,image/gif"
               required
               onChange={selectFile}
             />

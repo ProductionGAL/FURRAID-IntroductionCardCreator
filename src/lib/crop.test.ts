@@ -3,6 +3,7 @@ import type { PhotoCrop } from "../model"
 import { clampPan, getDisplayBox, getSourceCrop, zoomPhotoAt } from "./crop"
 
 const makePhoto = (overrides: Partial<PhotoCrop> = {}): PhotoCrop => ({
+  file: new File(["photo"], "photo.png", { type: "image/png" }),
   url: "blob:test",
   width: 2000,
   height: 1000,

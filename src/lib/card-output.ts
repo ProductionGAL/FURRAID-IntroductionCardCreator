@@ -1,6 +1,7 @@
 import type { CardContent } from "../model"
 
-const CARD_FILE_NAME = "furraid-introduction-card.png"
+const PNG_FILE_NAME = "furraid-introduction-card.png"
+const GIF_FILE_NAME = "furraid-introduction-card.gif"
 const CARD_SHARE_TITLE = "FUR:RAID 2026 자기소개 카드"
 
 export type FileShareTarget = {
@@ -45,7 +46,7 @@ export const downloadCardImage = (blob: Blob): void => {
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement("a")
   anchor.href = url
-  anchor.download = CARD_FILE_NAME
+  anchor.download = blob.type === "image/gif" ? GIF_FILE_NAME : PNG_FILE_NAME
   anchor.click()
   URL.revokeObjectURL(url)
 }
@@ -56,7 +57,8 @@ export const shareCardImage = async (
 ): Promise<CardShareResult> => {
   if (!target) return "unavailable"
 
-  const file = new File([input.blob], CARD_FILE_NAME, { type: "image/png" })
+  const fileName = input.blob.type === "image/gif" ? GIF_FILE_NAME : PNG_FILE_NAME
+  const file = new File([input.blob], fileName, { type: input.blob.type })
   const files = [file]
   if (!target.canShare({ files })) return "unavailable"
 

@@ -53,7 +53,7 @@ export const CropDialog = (props: CropDialogProps) => {
         다른 사진 선택
         <input
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/gif"
           onChange={(event) => {
             const file = event.currentTarget.files?.item(0)
             if (file) props.onPhotoFile(file)

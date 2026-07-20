@@ -13,6 +13,7 @@ const requireCondition = (condition: boolean, message: string): void => {
 }
 
 const baseUrl = "http://127.0.0.1:4173/editor/"
+const baseOrigin = new URL(baseUrl).origin
 const evidenceDirectory = ".omo/evidence/self-card-redesign"
 const validImage = "/tmp/furraid-redesign-valid.png"
 const smallImage = "/tmp/furraid-redesign-small.png"
@@ -52,7 +53,7 @@ desktopPage.on("console", (message) => {
 })
 desktopPage.on("request", (request) => {
   const url = new URL(request.url())
-  if (url.origin !== baseUrl) externalRequests.push(request.url())
+  if (url.origin !== baseOrigin) externalRequests.push(request.url())
 })
 
 await desktopPage.goto(baseUrl, { waitUntil: "networkidle" })
@@ -149,6 +150,41 @@ await desktopPage.evaluate(() => {
   if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
   window.scrollTo(0, 0)
 })
+const filledNameFieldBackgrounds = await desktopPage
+  .locator("#nickname, #character-name")
+  .evaluateAll((fields) => fields.map((field) => getComputedStyle(field).backgroundColor))
+requireCondition(
+  filledNameFieldBackgrounds.every((background) => background === "rgb(247, 251, 255)"),
+  `filled name fields do not cover the placeholders: ${filledNameFieldBackgrounds.join(", ")}`,
+)
+const cdp = await desktopContext.newCDPSession(desktopPage)
+await cdp.send("DOM.enable")
+await cdp.send("CSS.enable")
+const { root } = await cdp.send("DOM.getDocument")
+const { nodeId: nicknameNodeId } = await cdp.send("DOM.querySelector", {
+  nodeId: root.nodeId,
+  selector: "#nickname",
+})
+await cdp.send("CSS.forcePseudoState", {
+  nodeId: nicknameNodeId,
+  forcedPseudoClasses: ["autofill"],
+})
+const autofillStyle = await desktopPage.locator("#nickname").evaluate((field) => {
+  const style = getComputedStyle(field)
+  return { boxShadow: style.boxShadow, textFillColor: style.webkitTextFillColor }
+})
+requireCondition(
+  autofillStyle.boxShadow.includes("rgb(247, 251, 255)"),
+  `autofill background is not card surface: ${autofillStyle.boxShadow}`,
+)
+requireCondition(
+  autofillStyle.textFillColor === "rgb(49, 128, 196)",
+  `autofill text is not card blue: ${autofillStyle.textFillColor}`,
+)
+await cdp.send("CSS.forcePseudoState", {
+  nodeId: nicknameNodeId,
+  forcedPseudoClasses: [],
+})
 await desktopPage.waitForTimeout(700)
 await desktopPage.screenshot({
   path: `${evidenceDirectory}/desktop-filled-warmup.png`,
@@ -214,7 +250,7 @@ await mobilePage.screenshot({
   animations: "disabled",
 })
 const mobileDownloadPromise = mobilePage.waitForEvent("download")
-await mobilePage.locator(".mobile-save button").click()
+await mobilePage.locator(".mobile-save .save-action:not(.share-action)").click()
 await (await mobileDownloadPromise).saveAs(`${evidenceDirectory}/mobile-exported-card.png`)
 await mobileContext.close()
 

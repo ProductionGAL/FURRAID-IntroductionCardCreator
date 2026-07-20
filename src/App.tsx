@@ -5,9 +5,9 @@ import logoUrl from "./assets/furraid2026_left_logo.png"
 import downloadIconUrl from "./assets/Icon_Download2.svg"
 import { CropDialog } from "./components/CropDialog"
 import { InlineCardEditor } from "./components/InlineCardEditor"
-import { canvasToPngBlob, downloadCardImage, shareCardImage } from "./lib/card-output"
-import { renderCard } from "./lib/draw-card"
-import { createPhotoCrop } from "./lib/image-file"
+import { downloadCardImage, shareCardImage } from "./lib/card-output"
+import { createPhotoCrop, isGifFile } from "./lib/image-file"
+import { renderCardBlob } from "./lib/render-card-blob"
 import type { CardContent, CardValidationIssue, PhotoCrop } from "./model"
 import { EMPTY_CONTENT, getCardValidationIssue } from "./model"
 
@@ -104,12 +104,45 @@ const ErrorToast = ({ message }: { readonly message: string }) => {
   )
 }
 
+const GifExportProgress = ({ progress }: { readonly progress: number }) => {
+  const radius = 42
+  const circumference = 2 * Math.PI * radius
+  const dashOffset = circumference * (1 - progress / 100)
+
+  return (
+    <div
+      className="export-progress"
+      role="progressbar"
+      aria-label="GIF 이미지 생성 진행률"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={progress}
+    >
+      <svg viewBox="0 0 96 96" aria-hidden>
+        <title>GIF 이미지 생성 진행률</title>
+        <circle className="export-progress__track" cx="48" cy="48" r={radius} />
+        <circle
+          className="export-progress__value"
+          cx="48"
+          cy="48"
+          r={radius}
+          strokeDasharray={circumference}
+          strokeDashoffset={dashOffset}
+        />
+      </svg>
+      <strong>{progress}%</strong>
+      <span>GIF 생성 중</span>
+    </div>
+  )
+}
+
 export const App = () => {
   const [content, setContent] = useState<CardContent>(EMPTY_CONTENT)
   const [photo, setPhoto] = useState<PhotoCrop | null>(null)
   const [cropOpen, setCropOpen] = useState(false)
   const [uploadError, setUploadError] = useState("")
   const [isExporting, setIsExporting] = useState(false)
+  const [gifExportProgress, setGifExportProgress] = useState<number | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const editorRef = useRef<HTMLElement>(null)
 
@@ -132,6 +165,9 @@ export const App = () => {
       .then((nextPhoto) => {
         setPhoto(nextPhoto)
         setCropOpen(true)
+        if (isGifFile(file)) {
+          setUploadError("경고: GIF 저장은 실험중인 기능으로 정상동작하지 않을 수 있습니다.")
+        }
       })
       .catch((error: unknown) => {
         setUploadError(error instanceof Error ? error.message : "사진을 불러오지 못했습니다.")
@@ -150,6 +186,26 @@ export const App = () => {
     return false
   }
 
+  const renderCurrentCard = async (
+    canvas: HTMLCanvasElement,
+    source: HTMLElement,
+    currentPhoto: PhotoCrop,
+  ): Promise<Blob> => {
+    const isGif = isGifFile(currentPhoto.file)
+    if (isGif) setGifExportProgress(0)
+    try {
+      return await renderCardBlob({
+        canvas,
+        frameUrl,
+        photo: currentPhoto,
+        source,
+        ...(isGif ? { onProgress: setGifExportProgress } : {}),
+      })
+    } finally {
+      if (isGif) setGifExportProgress(null)
+    }
+  }
+
   const exportCard = async (): Promise<void> => {
     if (isExporting || !validateContent()) return
     if (!photo) return
@@ -158,8 +214,7 @@ export const App = () => {
     if (!canvas || !source) return
     setIsExporting(true)
     try {
-      await renderCard({ canvas, frameUrl, photo, source })
-      downloadCardImage(await canvasToPngBlob(canvas))
+      downloadCardImage(await renderCurrentCard(canvas, source, photo))
     } catch {
       setUploadError("이미지를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.")
     } finally {
@@ -175,8 +230,8 @@ export const App = () => {
     if (!canvas || !source) return
     setIsExporting(true)
     try {
-      await renderCard({ canvas, frameUrl, photo, source })
-      const result = await shareCardImage({ blob: await canvasToPngBlob(canvas), content })
+      const blob = await renderCurrentCard(canvas, source, photo)
+      const result = await shareCardImage({ blob, content })
       if (result === "unavailable") {
         setUploadError(
           "이 브라우저에서는 이미지 공유를 지원하지 않습니다. 이미지 저장을 이용해 주세요.",
@@ -230,6 +285,7 @@ export const App = () => {
       <PrivacyCopy className="privacy-copy privacy-copy--mobile" />
 
       {uploadError ? <ErrorToast key={uploadError} message={uploadError} /> : null}
+      {gifExportProgress === null ? null : <GifExportProgress progress={gifExportProgress} />}
 
       <CropDialog
         open={cropOpen}

@@ -2,7 +2,7 @@ import type { PhotoCrop } from "../model"
 
 export class UnsupportedImageError extends Error {
   constructor() {
-    super("JPG, PNG 또는 WebP 이미지 파일을 선택해 주세요.")
+    super("JPG, PNG, WebP 또는 GIF 이미지 파일을 선택해 주세요.")
     this.name = "UnsupportedImageError"
   }
 }
@@ -28,14 +28,17 @@ export class UndersizedImageError extends Error {
   }
 }
 
-const SUPPORTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"])
+const SUPPORTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"])
 const MAX_FILE_SIZE = 200 * 1024 * 1024
+
+export const isGifFile = (file: File): boolean =>
+  file.type.toLowerCase() === "image/gif" || file.name.toLowerCase().endsWith(".gif")
 
 export const hasMinimumImageSize = (width: number, height: number): boolean =>
   width >= 500 && height >= 500
 
 export const createPhotoCrop = (file: File): Promise<PhotoCrop> => {
-  if (!SUPPORTED_TYPES.has(file.type)) {
+  if (!SUPPORTED_TYPES.has(file.type) && !isGifFile(file)) {
     return Promise.reject(new UnsupportedImageError())
   }
   if (file.size > MAX_FILE_SIZE) return Promise.reject(new OversizedImageError())
@@ -50,6 +53,7 @@ export const createPhotoCrop = (file: File): Promise<PhotoCrop> => {
         return
       }
       resolve({
+        file,
         url,
         width: image.naturalWidth,
         height: image.naturalHeight,

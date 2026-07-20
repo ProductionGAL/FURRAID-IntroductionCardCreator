@@ -11,12 +11,15 @@
     "format": "biome check --write .",
     "test": "bun test",
     "qa:parity": "bun run scripts/preview-export-parity.mts",
+    "qa:gif-render": "bun run scripts/gif-output-stability.mts",
     "qa:save-render": "bun run scripts/save-render-stability.mts",
     "qa:share-render": "bun run scripts/share-render-stability.mts",
     "doctor": "bunx react-doctor@latest"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
+    "gifenc": "^1.0.3",
+    "gifuct-js": "^2.1.2",
     "html-to-image": "^1.11.13",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"

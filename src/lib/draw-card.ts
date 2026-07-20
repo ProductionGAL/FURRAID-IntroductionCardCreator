@@ -125,17 +125,21 @@ type RenderInput = {
   readonly source: HTMLElement
 }
 
-export const renderCard = async (input: RenderInput): Promise<void> => {
-  const context = input.canvas.getContext("2d")
-  if (!context) throw new TypeError("2D canvas context is unavailable")
+export type PreparedCardLayers = {
+  readonly editor: HTMLCanvasElement
+  readonly frame: HTMLImageElement
+}
 
-  input.canvas.width = CARD_WIDTH
-  input.canvas.height = CARD_HEIGHT
+type PrepareCardLayersInput = Pick<RenderInput, "frameUrl" | "source">
+
+export const prepareCardLayers = async (
+  input: PrepareCardLayersInput,
+): Promise<PreparedCardLayers> => {
   await document.fonts.ready
   const { host, editor } = createNativeEditorClone(input.source)
 
   try {
-    const [editorCanvas, frame, photo] = await Promise.all([
+    const [editorCanvas, frame] = await Promise.all([
       toCanvas(editor, {
         width: EDITABLE_WIDTH,
         height: CARD_HEIGHT,
@@ -146,24 +150,48 @@ export const renderCard = async (input: RenderInput): Promise<void> => {
         skipAutoScale: true,
       }),
       loadImage(input.frameUrl),
-      getLoadedPhoto(input.source, input.photo),
     ])
-    const crop = getSourceCrop(input.photo)
-    context.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT)
-    context.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT)
-    context.drawImage(
-      photo,
-      crop.sourceX,
-      crop.sourceY,
-      crop.sourceSize,
-      crop.sourceSize,
-      0,
-      0,
-      EDITABLE_WIDTH,
-      EDITABLE_WIDTH,
-    )
-    context.drawImage(editorCanvas, 0, 0, EDITABLE_WIDTH, CARD_HEIGHT)
+    return { editor: editorCanvas, frame }
   } finally {
     host.remove()
   }
+}
+
+type DrawCardFrameInput = {
+  readonly canvas: HTMLCanvasElement
+  readonly layers: PreparedCardLayers
+  readonly photo: CanvasImageSource
+  readonly crop: PhotoCrop
+}
+
+export const drawCardFrame = (input: DrawCardFrameInput): CanvasRenderingContext2D => {
+  if (input.canvas.width !== CARD_WIDTH) input.canvas.width = CARD_WIDTH
+  if (input.canvas.height !== CARD_HEIGHT) input.canvas.height = CARD_HEIGHT
+  const context = input.canvas.getContext("2d", { willReadFrequently: true })
+  if (!context) throw new TypeError("2D canvas context is unavailable")
+
+  const crop = getSourceCrop(input.crop)
+  context.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT)
+  context.drawImage(input.layers.frame, 0, 0, CARD_WIDTH, CARD_HEIGHT)
+  context.drawImage(
+    input.photo,
+    crop.sourceX,
+    crop.sourceY,
+    crop.sourceSize,
+    crop.sourceSize,
+    0,
+    0,
+    EDITABLE_WIDTH,
+    EDITABLE_WIDTH,
+  )
+  context.drawImage(input.layers.editor, 0, 0, EDITABLE_WIDTH, CARD_HEIGHT)
+  return context
+}
+
+export const renderCard = async (input: RenderInput): Promise<void> => {
+  const [layers, photo] = await Promise.all([
+    prepareCardLayers(input),
+    getLoadedPhoto(input.source, input.photo),
+  ])
+  drawCardFrame({ canvas: input.canvas, layers, photo, crop: input.photo })
 }
