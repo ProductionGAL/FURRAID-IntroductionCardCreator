@@ -132,7 +132,7 @@ export const InlineCardEditor = (props: InlineCardEditorProps) => {
         className={`inline-field inline-field--introduction${props.content.introduction ? " is-filled" : ""}`}
         aria-label="자기소개"
         value={props.content.introduction}
-        maxLength={120}
+        maxLength={72}
         onChange={(event) =>
           props.onContentChange({ ...props.content, introduction: event.currentTarget.value })
         }

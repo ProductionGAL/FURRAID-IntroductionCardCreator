@@ -1,3 +1,4 @@
+import { resolve } from "node:path"
 import { chromium } from "playwright"
 
 declare global {
@@ -14,6 +15,7 @@ class ShareRenderFailure extends Error {
 }
 
 const previewUrl = process.env.PREVIEW_URL ?? "http://127.0.0.1:4173/editor/"
+const fixturePath = resolve("public/PreviewImage.png")
 const minimumBluePixels = 50_000
 const minimumPhotoPixels = 50_000
 
@@ -22,6 +24,13 @@ const context = await browser.newContext({ viewport: { width: 390, height: 844 }
 
 try {
   await context.addInitScript(() => {
+    const nativeDecode = HTMLImageElement.prototype.decode
+    HTMLImageElement.prototype.decode = function decode(): Promise<void> {
+      if (this.src.startsWith("blob:")) {
+        return Promise.reject(new DOMException("Blob decode rejected", "EncodingError"))
+      }
+      return nativeDecode.call(this)
+    }
     Object.defineProperty(navigator, "canShare", { configurable: true, value: () => true })
     Object.defineProperty(navigator, "share", {
       configurable: true,
@@ -33,9 +42,7 @@ try {
 
   const page = await context.newPage()
   await page.goto(previewUrl, { waitUntil: "networkidle" })
-  await page
-    .locator('.inline-card__photo input[type="file"]')
-    .setInputFiles("public/PreviewImage.png")
+  await page.locator('.inline-card__photo input[type="file"]').setInputFiles(fixturePath)
   await page.getByRole("button", { name: "이 위치로 적용" }).click()
   await page.getByRole("textbox", { name: "닉네임" }).fill("구름")
   await page.getByRole("textbox", { name: "캐릭터 이름" }).fill("Cloud")

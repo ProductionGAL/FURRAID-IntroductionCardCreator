@@ -30,6 +30,38 @@ const loadImage = (source: string): Promise<HTMLImageElement> =>
     image.src = source
   })
 
+const getLoadedPhoto = (source: HTMLElement, photo: PhotoCrop): Promise<HTMLImageElement> => {
+  const image = source.querySelector<HTMLImageElement>(".inline-card__photo img")
+  if (!image || image.src !== photo.url) return Promise.reject(new ImageLoadError(photo.url))
+
+  const isCurrentPhoto = (): boolean =>
+    image.src === photo.url &&
+    image.naturalWidth === photo.width &&
+    image.naturalHeight === photo.height
+
+  if (image.complete) {
+    return isCurrentPhoto() ? Promise.resolve(image) : Promise.reject(new ImageLoadError(photo.url))
+  }
+
+  return new Promise((resolve, reject) => {
+    const handleLoad = (): void => {
+      cleanup()
+      if (isCurrentPhoto()) resolve(image)
+      else reject(new ImageLoadError(photo.url))
+    }
+    const handleError = (): void => {
+      cleanup()
+      reject(new ImageLoadError(photo.url))
+    }
+    const cleanup = (): void => {
+      image.removeEventListener("load", handleLoad)
+      image.removeEventListener("error", handleError)
+    }
+    image.addEventListener("load", handleLoad)
+    image.addEventListener("error", handleError)
+  })
+}
+
 const synchronizeFormValues = (source: HTMLElement, clone: HTMLElement): void => {
   const sourceInputs = source.querySelectorAll("input")
   const clonedInputs = clone.querySelectorAll("input")
@@ -114,7 +146,7 @@ export const renderCard = async (input: RenderInput): Promise<void> => {
         skipAutoScale: true,
       }),
       loadImage(input.frameUrl),
-      loadImage(input.photo.url),
+      getLoadedPhoto(input.source, input.photo),
     ])
     const crop = getSourceCrop(input.photo)
     context.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT)
