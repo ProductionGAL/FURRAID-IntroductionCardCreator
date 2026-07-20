@@ -12,7 +12,7 @@ describe("card share text", () => {
     }
 
     expect(createCardShareText(content)).toBe(
-      "FUR:RAID 2026 자기소개 카드\nFUR:RAID 2026 FIELDTRIP\n구름 / Cloud\n이번 행사에 참여할 예정이에요! 잘 부탁드려요!\n\n#퍼레이드2026 #FURRAID2026",
+      "FUR:RAID 2026 자기소개 카드\n구름 / Cloud\n이번 행사에 참여할 예정이에요! 잘 부탁드려요!\n\n#퍼레이드2026 #FURRAID2026",
     )
   })
 

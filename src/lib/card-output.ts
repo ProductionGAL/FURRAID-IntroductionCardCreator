@@ -26,7 +26,6 @@ export const createCardShareText = (content: CardContent): string => {
   const nickname = content.nickname.trim()
   const characterName = content.characterName.trim()
 
-  lines.push("FUR:RAID 2026 FIELDTRIP")
   if (nickname && characterName) lines.push(`${nickname} / ${characterName}`)
   lines.push("이번 행사에 참여할 예정이에요! 잘 부탁드려요!")
   lines.push("")
