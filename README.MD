@@ -86,7 +86,7 @@ Wanted Sans의 라이선스는 `public/fonts/WANTED-SANS-OFL.txt`에서 확인�
 
 ## 저작권 및 라이선스
 
-Copyright © 2026 FUR:RAID Comm. All rights reserved.
+© 2026 FUR:RAID Comm. All rights reserved.
 
 Developed by Logmong.
 
