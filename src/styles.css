@@ -9,6 +9,7 @@
 :root {
   --furraid-blue: #3486c7;
   --card-blue: #3180c4;
+  --card-placeholder: rgb(49 128 196 / 48%);
   --card-surface: #f7fbff;
   --white: #ffffff;
   --white-muted: rgb(255 255 255 / 62%);
@@ -574,6 +575,7 @@ label:has(input:focus-visible) {
   z-index: 1;
   overflow: hidden;
   pointer-events: none;
+  color: var(--card-placeholder);
   white-space: pre-wrap;
   background: var(--card-surface);
 }
