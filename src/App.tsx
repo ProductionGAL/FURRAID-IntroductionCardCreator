@@ -257,7 +257,7 @@ export const App = () => {
             <span className="mobile-title">자기소개 카드</span>
           </h1>
           <p>
-            Self Introduction Card Generator
+            Intro Card Generator
             <br />
             自己紹介カードメーカー
           </p>

@@ -41,7 +41,7 @@ export const LandingPage = () => (
         <img src={logoUrl} alt="FUR:RAID 2026 FIELDTRIP" width="693" height="499" />
         <h1>자기소개 카드</h1>
         <p>
-          Self Introduction Card Generator
+          Intro Card Generator
           <br />
           自己紹介カードメーカー
         </p>
