@@ -1,5 +1,11 @@
 import { chromium } from "playwright"
 
+declare global {
+  interface Window {
+    capturedExportSvg?: string
+  }
+}
+
 class SaveRenderFailure extends Error {
   constructor(message: string) {
     super(message)
@@ -8,8 +14,12 @@ class SaveRenderFailure extends Error {
 }
 
 const previewUrl = process.env.PREVIEW_URL ?? "http://127.0.0.1:4173/editor/"
-const browser = await chromium.launch({ channel: "chrome", headless: true })
-const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
+const browser = await chromium.launch({ headless: true })
+const context = await browser.newContext({
+  viewport: { width: 390, height: 844 },
+  colorScheme: "dark",
+  forcedColors: "active",
+})
 
 try {
   await context.addInitScript(() => {
@@ -20,6 +30,23 @@ try {
       }
       return nativeDecode.call(this)
     }
+
+    const sourceDescriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src")
+    if (!sourceDescriptor?.set || !sourceDescriptor.get) {
+      throw new TypeError("Image source descriptor is unavailable")
+    }
+    const nativeSourceSetter = sourceDescriptor.set
+    Object.defineProperty(HTMLImageElement.prototype, "src", {
+      configurable: true,
+      enumerable: sourceDescriptor.enumerable,
+      get: sourceDescriptor.get,
+      set(value) {
+        if (typeof value === "string" && value.startsWith("data:image/svg+xml")) {
+          window.capturedExportSvg = value
+        }
+        nativeSourceSetter.call(this, value)
+      },
+    })
   })
 
   const page = await context.newPage()
@@ -92,18 +119,58 @@ try {
       const blue = introductionPixels[index + 2] ?? 0
       if (blue > red + 25 && blue > green + 5) blueTextPixels += 1
     }
-    return { centerPixel, blueTextPixels }
+    const getBlackPixelRatio = (
+      context: CanvasRenderingContext2D,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+    ): number => {
+      const pixels = context.getImageData(x, y, width, height).data
+      let blackPixels = 0
+      for (let index = 0; index < pixels.length; index += 4) {
+        const red = pixels[index] ?? 0
+        const green = pixels[index + 1] ?? 0
+        const blue = pixels[index + 2] ?? 0
+        if (red < 20 && green < 20 && blue < 20) blackPixels += 1
+      }
+      return blackPixels / (width * height)
+    }
+    return {
+      centerPixel,
+      blueTextPixels,
+      nicknameBlackRatio: getBlackPixelRatio(context, 350, 1215, 830, 120),
+      introductionBlackRatio: getBlackPixelRatio(context, 350, 1735, 830, 260),
+    }
   })
-  const { centerPixel, blueTextPixels } = canvasEvidence
+  const capturedSvg = await page.evaluate(() => window.capturedExportSvg ?? "")
+  const decodedSvg = capturedSvg
+    ? decodeURIComponent(capturedSvg.slice(capturedSvg.indexOf(",") + 1))
+    : ""
+  const hasEmbeddedWantedFont =
+    decodedSvg.includes('font-family: "Wanted Sans Variable"') &&
+    /src:\s*url\(["']?data:application\/font-woff;base64,/.test(decodedSvg)
+  const { centerPixel, blueTextPixels, nicknameBlackRatio, introductionBlackRatio } = canvasEvidence
   const [red = 0, green = 0, blue = 0] = centerPixel
   if (red < 220 || green > 30 || blue < 120) {
     throw new SaveRenderFailure(`export used a stale photo: ${centerPixel.join(",")}`)
+  }
+  const compatibilityFailures: string[] = []
+  if (!hasEmbeddedWantedFont) compatibilityFailures.push("Wanted Sans was not embedded")
+  if (nicknameBlackRatio > 0.01) {
+    compatibilityFailures.push(`nickname background is black (${nicknameBlackRatio})`)
+  }
+  if (introductionBlackRatio > 0.01) {
+    compatibilityFailures.push(`introduction background is black (${introductionBlackRatio})`)
+  }
+  if (compatibilityFailures.length > 0) {
+    throw new SaveRenderFailure(compatibilityFailures.join("; "))
   }
   if (blueTextPixels < 500) {
     throw new SaveRenderFailure(`default introduction was not rendered: ${blueTextPixels} pixels`)
   }
   process.stdout.write(
-    `${JSON.stringify({ ...outcome, defaultIntroduction, centerPixel, blueTextPixels })}\n`,
+    `${JSON.stringify({ ...outcome, defaultIntroduction, centerPixel, blueTextPixels, hasEmbeddedWantedFont, nicknameBlackRatio, introductionBlackRatio })}\n`,
   )
 } finally {
   await context.close()

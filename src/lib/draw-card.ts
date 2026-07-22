@@ -107,6 +107,8 @@ const createNativeEditorClone = (
   clonedNode.style.width = `${EDITABLE_WIDTH}px`
   clonedNode.style.height = `${CARD_HEIGHT}px`
   clonedNode.style.background = "transparent"
+  clonedNode.style.colorScheme = "only light"
+  clonedNode.style.forcedColorAdjust = "none"
   clonedNode.setAttribute("aria-hidden", "true")
   clonedNode.inert = true
   clonedNode.querySelector(".inline-card__frame")?.remove()
