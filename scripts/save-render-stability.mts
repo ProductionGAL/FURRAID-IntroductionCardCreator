@@ -81,6 +81,33 @@ try {
   await page.getByLabel("닉네임").fill("저장 테스트")
   await page.locator(".inline-schedule input").first().check()
 
+  const liveControlColors = await page.evaluate(() => {
+    const nickname = document.querySelector("#nickname")
+    const defaultIntroduction = document.querySelector(".inline-field--introduction-default")
+    const selectedSchedule = document.querySelector(".inline-schedule > span.is-checked")
+    if (
+      !(nickname instanceof HTMLElement) ||
+      !(defaultIntroduction instanceof HTMLElement) ||
+      !(selectedSchedule instanceof HTMLElement)
+    ) {
+      throw new TypeError("Live card controls are unavailable")
+    }
+    return {
+      nickname: getComputedStyle(nickname).backgroundColor,
+      defaultIntroduction: getComputedStyle(defaultIntroduction).backgroundColor,
+      selectedSchedule: getComputedStyle(selectedSchedule).backgroundColor,
+    }
+  })
+  if (
+    liveControlColors.nickname !== "rgb(247, 251, 255)" ||
+    liveControlColors.defaultIntroduction !== "rgb(247, 251, 255)" ||
+    liveControlColors.selectedSchedule !== "rgb(49, 128, 196)"
+  ) {
+    throw new SaveRenderFailure(
+      `live controls were recolored: ${JSON.stringify(liveControlColors)}`,
+    )
+  }
+
   const defaultIntroduction = await page.locator(".inline-field--introduction-default").innerText()
   if (defaultIntroduction !== "이번 행사에 참여할 예정이에요! 잘 부탁드려요!") {
     throw new SaveRenderFailure(`unexpected default introduction: ${defaultIntroduction}`)

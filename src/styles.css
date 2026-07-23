@@ -455,6 +455,8 @@ label:has(input:focus-visible) {
   isolation: isolate;
   color: var(--card-blue);
   background: var(--card-surface);
+  color-scheme: only light;
+  forced-color-adjust: none;
 }
 
 .inline-card__frame {
